@@ -1,4 +1,5 @@
 import React from "react";
+import { useState } from "react";
 
 const Home = () => {
   const UserList = [
@@ -70,7 +71,7 @@ const Home = () => {
       date: "24th Nov, 2021",
     },
     {
-      massage: "I am fine.",
+      massage: "I am fine.dsf  dsfds f f dsfefewf dsfefsdf e efsdfdsfe ",
       self: true,
       date: "24th Nov, 2021",
     },
@@ -80,10 +81,16 @@ const Home = () => {
       date: "24th Nov, 2021",
     },
   ];
+  const [toggle, setToggle] = useState(false);
   return (
     <div className="h-screen">
       <section className="flex h-full ">
-        <div className="sm:border-r flex flex-col w-72 shadow-lg  bg-gradient-to-r from-blue-500 to-blue-400 border-gray-100">
+        <div
+          style={{ transition: "0.3s ease" }}
+          className={`sm:border-r fixed sm:w-72 max-h-screen overflow-hidden sm:static z-10 flex flex-col shadow-lg  bg-gradient-to-r from-blue-500 to-blue-400 border-gray-100 ${
+            toggle ? "w-72" : "w-0"
+          }`}
+        >
           {/* Logo here */}
           <h1 className=" text-3xl flex gap-1 py-3  border-b-2 border-white text-center justify-center font-bold text-white">
             Messenger
@@ -152,10 +159,10 @@ const Home = () => {
                   <div className="flex-1 text-left text-white">
                     <h3 className="font-semibold">{user}</h3>
                     <div className="flex gap-1 items-center">
-                      <p className="text-sm flex-1 lastMsg overflow-hidden text-gray-100">
+                      <p className="text-sm flex-1 lastMsg overflow-hidden  text-gray-100">
                         {lastmassage}
                       </p>
-                      .<span className="text-xs self-center">{date}</span>
+                      .<span className="text-xs  self-center">{date}</span>
                     </div>
                   </div>
                 </div>
@@ -166,24 +173,44 @@ const Home = () => {
         {/* Massage Component */}
         <div className="flex-1">
           <div className="flex h-full  flex-col">
-            <div className="flex w-full  bg-gradient-to-r from-blue-400 to-blue-400 cursor-pointer  p-2 gap-2">
-              <div class="relative w-12 h-10">
-                <img
-                  class="rounded-full border border-gray-100 shadow-sm"
-                  src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                  alt="user image"
-                />
-                <div class="absolute top-0 right-0 h-3 w-3 my-1 border-2 border-white rounded-full bg-green-400 z-2"></div>
-              </div>
-              <div className="flex-1 text-left text-white">
-                <h3 className="font-semibold">Nabin Kharel</h3>
-                <div className="flex gap-1 items-center">
-                  <p className="text-sm flex-1 lastMsg overflow-hidden text-gray-100">
-                    Active Now
-                  </p>
+            <div className="flex  bg-gradient-to-r from-blue-400 to-blue-400 justify-between">
+              <div className="flex w-full  cursor-pointer  p-2 gap-2">
+                <div class="relative w-12 h-10">
+                  <img
+                    class="rounded-full border border-gray-100 shadow-sm"
+                    src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                    alt="user image"
+                  />
+                  <div class="absolute top-0 right-0 h-3 w-3 my-1 border-2 border-white rounded-full bg-green-400 z-2"></div>
+                </div>
+                <div className="flex-1 text-left text-white">
+                  <h3 className="font-semibold">Nabin Kharel</h3>
+                  <div className="flex gap-1 items-center">
+                    <p className="text-sm flex-1 lastMsg overflow-hidden text-gray-100">
+                      Active Now
+                    </p>
+                  </div>
                 </div>
               </div>
+              <svg
+                onClick={() => {
+                  setToggle(!toggle);
+                }}
+                className="w-6 sm:hidden cursor-pointer bg-transparent mr-2 text-white self-center h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                />
+              </svg>
             </div>
+
             <div className=" flex-1 w-full sbar mx-auto overflow-y-auto ">
               <div className="flex p-4 flex-col gap-2 w-full items-start">
                 {massage.map((data, index) => {
@@ -209,13 +236,13 @@ const Home = () => {
                           </div>
                         )}
                         <div
-                          className={`rounded-full bg-blue-400 text-white py-1 px-2 ${
-                            self ? "bg-blue-400" : "bg-gray-500"
+                          className={`rounded-3xl max-w-md  text-white py-1 px-2 ${
+                            self ? "bg-blue-400" : "bg-gray-400"
                           }`}
                         >
                           {massage}
                         </div>
-                        <div className="text-xs text-gray-400 self-center">
+                        <div className="text-xs flex-shrink-0 text-gray-400 self-center">
                           . {date}
                         </div>
                       </div>
