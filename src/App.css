@@ -1,0 +1,30 @@
+.App {
+  text-align: center;
+}
+.lastMsg {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.sbar::-webkit-scrollbar {
+  width: 5px;
+}
+.sbar {
+  scrollbar-width: thin;
+  scrollbar-color: #2681a5;
+}
+.sbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sbar::-webkit-scrollbar-thumb {
+  background-color: #2681a5;
+  border-radius: 6px;
+  border: 3px solid transparent;
+}
+.sbar::-webkit-scrollbar {
+  display: none;
+}
+.sbar:hover::-webkit-scrollbar {
+  display: block;
+}
