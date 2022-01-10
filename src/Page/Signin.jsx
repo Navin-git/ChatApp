@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 const Signin = () => {
   const [input, setinput] = useState({
     username: "",
@@ -87,6 +86,7 @@ const Signin = () => {
               </div>
             );
           })}
+
         <div className="w-full">
           <button
             type="submit"

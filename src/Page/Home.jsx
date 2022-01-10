@@ -1,6 +1,6 @@
 import React from "react";
 import { useState } from "react";
-
+import Picker from "emoji-picker-react";
 const Home = () => {
   const UserList = [
     {
@@ -81,6 +81,14 @@ const Home = () => {
       date: "24th Nov, 2021",
     },
   ];
+
+  const [inputStr, setInputStr] = useState("");
+  const [showPicker, setShowPicker] = useState(false);
+
+  const onEmojiClick = (event, emojiObject) => {
+    setInputStr((prevInput) => prevInput + emojiObject.emoji);
+    setShowPicker(false);
+  };
   const [toggle, setToggle] = useState(false);
   return (
     <div className="h-screen">
@@ -268,12 +276,12 @@ const Home = () => {
               </svg>
               <div className="ring-offset-1 ring-1 ring-white rounded-full  flex flex-1 items-center relative w-11/12  mx-auto my-2 ">
                 <input
-                  placeholder="enter your keyboard"
-                  className="rounded-2xl pr-10 hover:bg-opacity-20  transition focus:outline-none duration-200  bg-white bg-opacity-10 text-sm placeholder-gray-50 pl-4 backdrop-blur-sm text-gray-50 w-full h-8"
+                  className="rounded-2xl pr-10 hover:bg-opacity-20  transition focus:outline-none duration-200  bg-gray-500 bg-opacity-10 text-sm placeholder-gray-50 pl-4 backdrop-blur-sm text-gray-50 w-full h-10"
+                  value={inputStr}
+                  onChange={(e) => setInputStr(e.target.value)}
                 />
-                {/* <SearchIcon className="absolute right-4 text-gray-50" /> */}
-
                 <svg
+                  onClick={() => setShowPicker((val) => !val)}
                   className="w-6 h-6 absolute right-4 text-gray-50"
                   fill="none"
                   stroke="currentColor"
@@ -285,6 +293,35 @@ const Home = () => {
                     strokeLinejoin="round"
                     strokeWidth={2}
                     d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                {/* <img
+                  className="emoji-icon"
+                  src="https://icons.getbootstrap.com/assets/icons/emoji-smile.svg"
+                  onClick={() => setShowPicker((val) => !val)}
+                /> */}
+                {showPicker && (
+                  <div className="absolute bottom-full w-72 right-2">
+                    <Picker
+                      pickerStyle={{ width: "100%" }}
+                      onEmojiClick={onEmojiClick}
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="p-2 rounded-full">
+                <svg
+                  className="w-6 text-white transform rotate-90 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
                   />
                 </svg>
               </div>

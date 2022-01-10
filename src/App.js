@@ -5,6 +5,10 @@ import Home from "./Page/Home";
 import Register from "./Page/Register";
 import Signin from "./Page/Signin";
 
+import socketIoClient from "socket.io-client";
+
+const socket = socketIoClient("");
+
 function App() {
   return (
     <div className="App">
