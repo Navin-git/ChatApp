@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 const Signin = () => {
   const [input, setinput] = useState({
-    username: "",
     email: "",
     password: "",
   });
   const [error, seterror] = useState({});
-  const { username, email, password } = input;
+  const { email, password } = input;
   const Inputfield = [
     {
       name: "email",

@@ -81,6 +81,7 @@ const Home = () => {
       date: "24th Nov, 2021",
     },
   ];
+  const [active, setActive] = useState(0);
 
   const [inputStr, setInputStr] = useState("");
   const [showPicker, setShowPicker] = useState(false);
@@ -153,16 +154,21 @@ const Home = () => {
               const { user, lastmassage, date } = data;
               return (
                 <div
+                  onClick={() => {
+                    setActive(index);
+                  }}
                   key={index}
-                  className="flex my-1 rounded-lg flex-shrink-0 mr-2 hover:mr-0 focus:bg-blue-600 hover:bg-blue-600 cursor-pointer  p-2 gap-2"
+                  className={`flex my-1 rounded-lg flex-shrink-0 mr-2 hover:mr-0 focus:bg-blue-600 hover:bg-blue-600 cursor-pointer  p-2 gap-2 ${
+                    active === index ? "bg-blue-600" : ""
+                  }`}
                 >
-                  <div class="relative w-12 h-12">
+                  <div className="relative w-12 h-12">
                     <img
-                      class="rounded-full border border-gray-100 shadow-sm"
+                      className="rounded-full border border-gray-100 shadow-sm"
                       src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
                       alt="user image"
                     />
-                    <div class="absolute top-0 right-0 h-3 w-3 my-1 border-2 border-white rounded-full bg-green-400 z-2"></div>
+                    <div className="absolute top-0 right-0 h-3 w-3 my-1 border-2 border-white rounded-full bg-green-400 z-2"></div>
                   </div>
                   <div className="flex-1 text-left text-white">
                     <h3 className="font-semibold">{user}</h3>
@@ -183,13 +189,13 @@ const Home = () => {
           <div className="flex h-full  flex-col">
             <div className="flex  bg-gradient-to-r from-blue-400 to-blue-400 justify-between">
               <div className="flex w-full  cursor-pointer  p-2 gap-2">
-                <div class="relative w-12 h-10">
+                <div className="relative w-12 h-10">
                   <img
-                    class="rounded-full border border-gray-100 shadow-sm"
+                    className="rounded-full border border-gray-100 shadow-sm"
                     src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
                     alt="user image"
                   />
-                  <div class="absolute top-0 right-0 h-3 w-3 my-1 border-2 border-white rounded-full bg-green-400 z-2"></div>
+                  <div className="absolute top-0 right-0 h-3 w-3 my-1 border-2 border-white rounded-full bg-green-400 z-2"></div>
                 </div>
                 <div className="flex-1 text-left text-white">
                   <h3 className="font-semibold">Nabin Kharel</h3>
@@ -234,13 +240,13 @@ const Home = () => {
                         className={`flex gap-2 ${self && "flex-row-reverse"}`}
                       >
                         {!self && (
-                          <div class="relative w-9 h-9 self-center">
+                          <div className="relative w-9 h-9 self-center">
                             <img
-                              class="rounded-full border border-gray-100 shadow-sm"
+                              className="rounded-full border border-gray-100 shadow-sm"
                               src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
                               alt="user image"
                             />
-                            <div class="absolute top-0 right-0 h-3 w-3 my-1 border-2 border-white rounded-full bg-green-400 z-2"></div>
+                            <div className="absolute top-0 right-0 h-3 w-3 my-1 border-2 border-white rounded-full bg-green-400 z-2"></div>
                           </div>
                         )}
                         <div
