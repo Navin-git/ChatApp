@@ -1,10 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axiosInstance from "../API/AxiosInstance";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 const Signin = () => {
   const [input, setinput] = useState({
     email: "",
     password: "",
   });
   const [error, seterror] = useState({});
+
+  const [dataCheck, setDataCheck] = useState(false);
+  const [process, setprocess] = useState(false);
   const { email, password } = input;
   const Inputfield = [
     {
@@ -52,7 +59,54 @@ const Signin = () => {
   const Handelsubmit = (e) => {
     e.preventDefault();
     seterror(Validation(input));
+    setDataCheck(true);
   };
+  useEffect(() => {
+    if (Object.keys(error).length === 0 && dataCheck) {
+      setprocess(true);
+      axiosInstance
+        .post("user/login", { email, password })
+        .then((res) => {
+          console.log(res);
+          if (res.data.status === "success") {
+            setinput({
+              username: "",
+              email: "",
+              password: "",
+            });
+            localStorage.setItem("token", res.data.token);
+            window.location.assign("/");
+          } else {
+            console.log(res.data.error);
+            toast.error(res.data.error, {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+            });
+          }
+
+          setprocess(false);
+        })
+        .catch((err) => {
+          console.log(err);
+          toast.error("Something went wrong", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+          setprocess(false);
+        });
+    }
+    setDataCheck(false);
+  }, [dataCheck]);
   return (
     <div className="w-full bg-blue-100 min-h-screen  flex justify-center items-center">
       <form
@@ -89,9 +143,21 @@ const Signin = () => {
         <div className="w-full">
           <button
             type="submit"
-            className="bg-blue-500 hover:bg-blue-400 transition duration-300 py-2 px-8 float-right rounded text-white font-medium text-sm"
+            disabled={process ? true : false}
+            className={`bg-blue-500 flex items-center justify-center gap-2 h-10 w-36 hover:bg-blue-400 self-center transition duration-300 py-2 px-8 float-right rounded text-white font-medium text-sm ${
+              process ? "cursor-not-allowed" : "cursor-pointer"
+            }`}
           >
-            Sign in
+            {process ? (
+              <span className="lds-ring mx-auto mb-3">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+              </span>
+            ) : (
+              <span>Sign in</span>
+            )}
           </button>
         </div>
       </form>

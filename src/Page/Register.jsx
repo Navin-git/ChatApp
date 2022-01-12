@@ -1,5 +1,9 @@
 import React, { useState } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import axiosInstance from "../API/AxiosInstance";
+import { toast } from "react-toastify";
+
 const Register = () => {
   const [input, setinput] = useState({
     username: "",
@@ -7,7 +11,17 @@ const Register = () => {
     password: "",
   });
   const [error, seterror] = useState({});
+
+  const [dataCheck, setDataCheck] = useState(false);
+  const [process, setprocess] = useState(false);
+  const [backerror, setbackerror] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
+
   const { username, email, password } = input;
+
   const Inputfield = [
     {
       name: "username",
@@ -15,6 +29,7 @@ const Register = () => {
       placeholder: "Username",
       type: "text",
       validation: error.username,
+      error: backerror.username,
     },
     {
       name: "email",
@@ -22,6 +37,7 @@ const Register = () => {
       placeholder: "Email",
       type: "text",
       validation: error.email,
+      error: backerror.email,
     },
     {
       name: "password",
@@ -29,6 +45,7 @@ const Register = () => {
       placeholder: "Password",
       type: "password",
       validation: error.password,
+      error: backerror.password,
     },
   ];
   const Handelchange = (e) => {
@@ -40,6 +57,7 @@ const Register = () => {
       };
     });
   };
+
   const Validation = (data) => {
     const errors = {};
     if (!data.username) {
@@ -64,7 +82,55 @@ const Register = () => {
   const Handelsubmit = (e) => {
     e.preventDefault();
     seterror(Validation(input));
+    setDataCheck(true);
   };
+  useEffect(() => {
+    console.log("vKO Zz");
+    if (Object.keys(error).length === 0 && dataCheck) {
+      setprocess(true);
+
+      axiosInstance
+        .post("user/register", { username, email, password })
+        .then((res) => {
+          console.log(res);
+          localStorage.setItem("token", res.data.token);
+          if (res.data.status === "success") {
+            setinput({
+              username: "",
+              email: "",
+              password: "",
+            });
+
+            window.location.assign("/");
+          } else {
+            console.log(res.data.errors);
+            setbackerror((pre) => {
+              return {
+                ...pre,
+                ...res.data.errors,
+              };
+            });
+            console.log(backerror);
+          }
+          setprocess(false);
+        })
+        .catch((err) => {
+          console.log(err);
+          toast.error(err.response.data.error, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+          setprocess(false);
+        });
+    }
+    setDataCheck(false);
+  }, [dataCheck]);
+
   return (
     <div className="w-full bg-blue-100 min-h-screen  flex justify-center items-center">
       <form
@@ -77,7 +143,7 @@ const Register = () => {
         </Link>
         {Array.isArray(Inputfield) &&
           Inputfield.map((data, index) => {
-            const { name, value, placeholder, type, validation } = data;
+            const { name, value, placeholder, type, validation, error } = data;
             return (
               <div key={index} className="w-full">
                 <input
@@ -94,15 +160,34 @@ const Register = () => {
                     <div className="h-2 w-2 left-3 transform rotate-45 -top-1 absolute bg-red-500"></div>
                   </div>
                 )}
+                {console.log(error)}
+                {error && (
+                  <div className="bg-red-500 relative text-white rounded mt-1 text-sm text-center">
+                    <p> {error}</p>
+                    <div className="h-2 w-2 left-3 transform rotate-45 -top-1 absolute bg-red-500"></div>
+                  </div>
+                )}
               </div>
             );
           })}
         <div className="w-full">
           <button
             type="submit"
-            className="bg-blue-500 hover:bg-blue-400 transition duration-300 py-2 px-8 float-right rounded text-white font-medium text-sm"
+            disabled={process ? true : false}
+            className={`bg-blue-500 flex items-center justify-center gap-2 h-10 w-36 hover:bg-blue-400 self-center transition duration-300 py-2 px-8 float-right rounded text-white font-medium text-sm ${
+              process ? "cursor-not-allowed" : "cursor-pointer"
+            }`}
           >
-            Sign up
+            {process ? (
+              <span className="lds-ring mx-auto mb-3">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+              </span>
+            ) : (
+              <span>Sign up</span>
+            )}
           </button>
         </div>
       </form>
