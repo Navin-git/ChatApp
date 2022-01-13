@@ -5,6 +5,7 @@ const Home = () => {
   const video = useRef();
   const canvas = useRef();
   const canvasa = useRef();
+  const imgfile = useRef();
 
   const UserList = [
     {
@@ -89,6 +90,8 @@ const Home = () => {
   const [camera, setcamera] = useState(false);
   const [localstream, setlocalstream] = useState("");
   const [imagepath, setimagepath] = useState("");
+  const [file, setfile] = useState("");
+  const [imgs, setimgs] = useState([]);
 
   console.log("camera", camera, "localstream", localstream);
 
@@ -97,25 +100,58 @@ const Home = () => {
 
   const onEmojiClick = (event, emojiObject) => {
     setInputStr((prevInput) => prevInput + emojiObject.emoji);
-    setShowPicker(false);
+    // setShowPicker(false);
   };
   const [toggle, setToggle] = useState(false);
+  const Back = () => {
+    video.current.pause();
+    localstream.getTracks()[0].stop();
+    setcamera(false);
+  };
+  const ClickPhoto = () => {
+    if (!video) {
+      return;
+    }
+    let canvass = canvas.current;
+    console.log(video);
+    let ctx = canvass.getContext("2d");
+    ctx.drawImage(video.current, 0, 0, canvass.width, canvass.height);
+    let canvassa = canvasa.current;
+    console.log(canvasa);
+    let ctxa = canvassa.getContext("2d");
+    ctxa.drawImage(video.current, 0, 0, canvassa.width, canvassa.height);
+    let image_data_url = canvass.toDataURL("image/jpeg");
+    setimagepath(image_data_url);
+    console.log("me", image_data_url);
+  };
+  const Handelimage = (e) => {
+    // setimgs(e.target.files);
+    // var file = imgfile.current.files[0];
+    // var reader = new FileReader();
+    // var url = reader.readAsDataURL(file);
+    // console.log(url); // Would see a path?
+    // // TODO: concat files for setState
+
+    const file = imgfile.current.files[0];
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      setfile(reader.result);
+    };
+    if (file) {
+      reader.readAsDataURL(file);
+      setfile(reader.result);
+    } else {
+      setfile("");
+    }
+  };
 
   return (
     <div className="h-screen">
       {camera && (
         <div className="fixed  h-screen w-screen bg-gray-500  z-20">
           <div className="relative mx-auto   w-full h-full">
-            <div
-              onClick={(streams) => {
-                video.current.pause();
-                localstream.getTracks()[0].stop();
-                setcamera(false);
-              }}
-              className="bg-blue-500 p-2 rounded-full"
-            >
-              back
-            </div>{" "}
+            {" "}
             <video
               style={{ width: "100%", height: "100%" }}
               height={"100%"}
@@ -128,40 +164,15 @@ const Home = () => {
               width="320"
               height="240"
             ></canvas>
-            <div className="absolute z-50 right-0 left-0 bottom-20 sm:bottom-12 mx-auto">
+            <div className="absolute top-2 left-2">
               <div
                 onClick={() => {
-                  if (!video) {
-                    return;
-                  }
-                  let canvass = canvas.current;
-                  console.log(video);
-                  let ctx = canvass.getContext("2d");
-                  ctx.drawImage(
-                    video.current,
-                    0,
-                    0,
-                    canvass.width,
-                    canvass.height
-                  );
-                  let canvassa = canvasa.current;
-                  console.log(canvasa);
-                  let ctxa = canvassa.getContext("2d");
-                  ctxa.drawImage(
-                    video.current,
-                    0,
-                    0,
-                    canvassa.width,
-                    canvassa.height
-                  );
-                  let image_data_url = canvass.toDataURL("image/jpeg");
-                  setimagepath(image_data_url);
-                  console.log("me", image_data_url);
+                  Back();
                 }}
-                className=" bg-blue-500 cursor-pointer rounded-full flex justify-center items-center mx-auto w-14 h-14"
+                className=" bg-blue-500 cursor-pointer rounded-full flex justify-center items-center  w-14 h-14"
               >
                 <svg
-                  className="w-8 text-white h-8"
+                  className="w-7 h-7 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -171,15 +182,41 @@ const Home = () => {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                    d="M15 19l-7-7 7-7"
                   />
                 </svg>
+              </div>
+            </div>
+            <div className="absolute z-50 right-0 left-0 bottom-20 sm:bottom-12 mx-auto">
+              <div className="flex justify-center gap-2">
+                {" "}
+                <div
+                  onClick={() => {
+                    ClickPhoto();
+                  }}
+                  className=" bg-blue-500 cursor-pointer rounded-full flex justify-center items-center  w-14 h-14"
+                >
+                  <svg
+                    className="w-8 text-white h-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                </div>
               </div>
             </div>
           </div>
@@ -361,20 +398,17 @@ const Home = () => {
             <div className="flex w-full relative items-center mx-auto bg-gradient-to-r from-blue-400 to-blue-400 cursor-pointer  p-2 gap-2">
               {
                 <div
-                  className={`absolute -top-full  bg-blue-200 ${
-                    imagepath ? " h-20 p-2" : "hidden"
+                  onClick={() => {
+                    setimagepath("");
+                    setfile("");
+                  }}
+                  className={`absolute -top-full flex gap-2 bg-blue-200 ${
+                    imagepath || file ? " h-20 p-2" : "hidden"
                   }`}
                 >
-                  <div className="relative"></div>
-                  <canvas ref={canvasa} className=" h-16  "></canvas>
-                  <div
-                    onClick={() => {
-                      setimagepath("");
-                    }}
-                    className="absolute top-1 right-1 bg-blue-400 rounded-full p-1"
-                  >
+                  <div className="p-1 absolute z-10 top-1 right-1 rounded-full bg-blue-500 text-white">
                     <svg
-                      className="w-5 text-white h-5"
+                      className="w-5 h-5"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -388,6 +422,11 @@ const Home = () => {
                       />
                     </svg>
                   </div>
+                  <canvas
+                    ref={canvasa}
+                    className={` relative ${imagepath ? "h-16" : "h-0"}`}
+                  ></canvas>
+                  <img alt="" className="h-full" src={file} />
                 </div>
               }
               <svg
@@ -424,22 +463,35 @@ const Home = () => {
                   d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
                 />
               </svg>
-              <svg
-                className="w-7 h-7  text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              <div>
+                <label htmlFor="imgfile">
+                  <svg
+                    className="w-7 h-7 cursor-pointer text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                </label>
+                <input
+                  Id="imgfile"
+                  onChange={Handelimage}
+                  className="hidden"
+                  type={"file"}
+                  ref={imgfile}
                 />
-              </svg>
+              </div>
+
               <div className="ring-offset-1 ring-1 ring-white rounded-full  flex flex-1 items-center relative w-11/12  mx-auto my-2 ">
                 <input
+                  placeholder="Aa"
                   className="rounded-2xl pr-10 hover:bg-opacity-20  transition focus:outline-none duration-200  bg-gray-500 bg-opacity-10 text-sm placeholder-gray-50 pl-4 backdrop-blur-sm text-gray-50 w-full h-10"
                   value={inputStr}
                   onChange={(e) => setInputStr(e.target.value)}
@@ -465,11 +517,19 @@ const Home = () => {
                   onClick={() => setShowPicker((val) => !val)}
                 /> */}
                 {showPicker && (
-                  <div className="absolute bottom-full w-72 right-2">
-                    <Picker
-                      pickerStyle={{ width: "100%" }}
-                      onEmojiClick={onEmojiClick}
-                    />
+                  <div>
+                    <div className="absolute bottom-full z-20 w-72 right-2">
+                      <Picker
+                        pickerStyle={{ width: "100%" }}
+                        onEmojiClick={onEmojiClick}
+                      />
+                    </div>
+                    <div
+                      onClick={() => {
+                        setShowPicker(false);
+                      }}
+                      className="h-screen top-0 left-0  z-10 fixed w-full"
+                    ></div>
                   </div>
                 )}
               </div>
