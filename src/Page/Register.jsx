@@ -50,6 +50,11 @@ const Register = () => {
   ];
   const Handelchange = (e) => {
     const { name, value } = e.target;
+    setbackerror({
+      username: "",
+      email: "",
+      password: "",
+    });
     setinput((pre) => {
       return {
         ...pre,
@@ -93,8 +98,9 @@ const Register = () => {
         .post("user/register", { username, email, password })
         .then((res) => {
           console.log(res);
-          localStorage.setItem("token", res.data.token);
           if (res.data.status === "success") {
+            localStorage.setItem("token", res.data.token);
+
             setinput({
               username: "",
               email: "",
@@ -116,7 +122,7 @@ const Register = () => {
         })
         .catch((err) => {
           console.log(err);
-          toast.error(err.response.data.error, {
+          toast.error(err.response && err.response.data.error, {
             position: "top-right",
             autoClose: 5000,
             hideProgressBar: false,

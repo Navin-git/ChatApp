@@ -17,7 +17,24 @@ const socket = socketIoClient("");
 function App() {
   const [validityCheck, setValidityCheck] = useState(false);
   const [valid, setValid] = useState(false);
+  const showNotification = () => {
+    var notification = new Notification("hi", { body: "body" });
+  };
+  console.log(Notification.permission);
+
   useEffect(() => {
+    if (Notification.permission === "granted") {
+      showNotification();
+      alert("we have permision");
+    } else if (Notification.permission != "denied") {
+      Notification.requestPermission().then(function (permission) {
+        console.log(permission);
+        if (permission === "granted") {
+          showNotification();
+          alert("we have permision");
+        }
+      });
+    }
     {
       axiosInstance
         .post(`user/verify-jwt/`)
