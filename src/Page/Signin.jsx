@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../API/AxiosInstance";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -114,6 +115,9 @@ const Signin = () => {
         className="flex flex-col items-center bg-white p-10 rounded-lg border border-gray-100 shadow-lg gap-3 w-11/12 sm:w-8/12 md:w-4/12"
       >
         <h1 className="text-3xl font-medium text-gray-700">Sign In</h1>
+        <Link to={"/register"} className="text-blue-500 text-sm">
+          Do not have an account?
+        </Link>
         {Array.isArray(Inputfield) &&
           Inputfield.map((data, index) => {
             const { name, value, placeholder, type, validation } = data;
