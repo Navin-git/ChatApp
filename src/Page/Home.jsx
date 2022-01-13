@@ -1,7 +1,11 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Picker from "emoji-picker-react";
 const Home = () => {
+  const video = useRef();
+  const canvas = useRef();
+  const canvasa = useRef();
+
   const UserList = [
     {
       user: "Nabin Kharel",
@@ -82,6 +86,11 @@ const Home = () => {
     },
   ];
   const [active, setActive] = useState(0);
+  const [camera, setcamera] = useState(false);
+  const [localstream, setlocalstream] = useState("");
+  const [imagepath, setimagepath] = useState("");
+
+  console.log("camera", camera, "localstream", localstream);
 
   const [inputStr, setInputStr] = useState("");
   const [showPicker, setShowPicker] = useState(false);
@@ -91,8 +100,92 @@ const Home = () => {
     setShowPicker(false);
   };
   const [toggle, setToggle] = useState(false);
+
   return (
     <div className="h-screen">
+      {camera && (
+        <div className="fixed  h-screen w-screen bg-gray-500  z-20">
+          <div className="relative mx-auto   w-full h-full">
+            <div
+              onClick={(streams) => {
+                video.current.pause();
+                localstream.getTracks()[0].stop();
+                setcamera(false);
+              }}
+              className="bg-blue-500 p-2 rounded-full"
+            >
+              back
+            </div>{" "}
+            <video
+              style={{ width: "100%", height: "100%" }}
+              height={"100%"}
+              ref={video}
+              autoPlay
+            ></video>
+            <canvas
+              className="absolute top-10 right-10"
+              ref={canvas}
+              width="320"
+              height="240"
+            ></canvas>
+            <div className="absolute z-50 right-0 left-0 bottom-20 sm:bottom-12 mx-auto">
+              <div
+                onClick={() => {
+                  if (!video) {
+                    return;
+                  }
+                  let canvass = canvas.current;
+                  console.log(video);
+                  let ctx = canvass.getContext("2d");
+                  ctx.drawImage(
+                    video.current,
+                    0,
+                    0,
+                    canvass.width,
+                    canvass.height
+                  );
+                  let canvassa = canvasa.current;
+                  console.log(canvasa);
+                  let ctxa = canvassa.getContext("2d");
+                  ctxa.drawImage(
+                    video.current,
+                    0,
+                    0,
+                    canvassa.width,
+                    canvassa.height
+                  );
+                  let image_data_url = canvass.toDataURL("image/jpeg");
+                  setimagepath(image_data_url);
+                  console.log("me", image_data_url);
+                }}
+                className=" bg-blue-500 cursor-pointer rounded-full flex justify-center items-center mx-auto w-14 h-14"
+              >
+                <svg
+                  className="w-8 text-white h-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <section className="flex h-full ">
         <div
           style={{ transition: "0.3s ease" }}
@@ -265,7 +358,72 @@ const Home = () => {
                 })}
               </div>
             </div>
-            <div className="flex w-full items-center  bg-gradient-to-r from-blue-400 to-blue-400 cursor-pointer  p-2 gap-2">
+            <div className="flex w-full relative items-center mx-auto bg-gradient-to-r from-blue-400 to-blue-400 cursor-pointer  p-2 gap-2">
+              {
+                <div
+                  className={`absolute -top-full  bg-blue-200 ${
+                    imagepath ? " h-20 p-2" : "hidden"
+                  }`}
+                >
+                  <div className="relative"></div>
+                  <canvas ref={canvasa} className=" h-16  "></canvas>
+                  <div
+                    onClick={() => {
+                      setimagepath("");
+                    }}
+                    className="absolute top-1 right-1 bg-blue-400 rounded-full p-1"
+                  >
+                    <svg
+                      className="w-5 text-white h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              }
+              <svg
+                onClick={async () => {
+                  await setcamera(true);
+                  if (!video) {
+                    return;
+                  }
+                  navigator.mediaDevices
+                    .getUserMedia({ video: true })
+                    .then((stream) => {
+                      let videos = video.current;
+                      videos.srcObject = stream;
+                      setlocalstream(stream);
+                      videos.play();
+                    });
+                }}
+                className="w-7 text-white h-7"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
               <svg
                 className="w-7 h-7  text-white"
                 fill="none"
