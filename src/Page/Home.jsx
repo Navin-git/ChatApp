@@ -1,99 +1,36 @@
 import React from "react";
 import { useState, useRef } from "react";
-import Picker from "emoji-picker-react";
+import axiosInstance from "../API/AxiosInstance";
+import { useEffect } from "react";
+import Intro from "../Components/Intro";
+import moment from "moment";
+import Messanger from "./Messanger";
 const Home = () => {
   const video = useRef();
   const canvas = useRef();
   const canvasa = useRef();
   const imgfile = useRef();
+  const messagediv = useRef();
 
-  const UserList = [
-    {
-      user: "Nabin Kharel",
-      lastmassage: "User last massage",
-      date: "24th Nov, 2021",
-    },
-    {
-      user: "Dipendra Paudel",
-      lastmassage: "User last  massage",
-      date: "24th Nov, 2021",
-    },
-    {
-      user: "Ram Poudal",
-      lastmassage: "User last massage",
-      date: "24th Nov, 2021",
-    },
-    {
-      user: "Hari BK",
-      lastmassage: "User last massage",
-      date: "24th Nov, 2021",
-    },
-    {
-      user: "Daddys little princes",
-      lastmassage: "User last massage",
-      date: "24th Nov, 2021",
-    },
-    {
-      user: "Papa ki pari",
-      lastmassage: "User last massage",
-      date: "24th Nov, 2021",
-    },
-    {
-      user: "Handsome kta mho",
-      lastmassage: "User last massage",
-      date: "24th Nov, 2021",
-    },
-    {
-      user: "Handsome kta mho",
-      lastmassage: "User last massage",
-      date: "24th Nov, 2021",
-    },
-    {
-      user: "Handsome kta mho",
-      lastmassage: "User last massage",
-      date: "24th Nov, 2021",
-    },
-    {
-      user: "Handsome kta mho",
-      lastmassage: "User last massage",
-      date: "24th Nov, 2021",
-    },
-  ];
-  const massage = [
-    {
-      massage: "Hey Nabin",
-      self: false,
-      date: "24th Nov, 2021",
-    },
-    {
-      massage: "How are you?",
-      self: false,
-      date: "24th Nov, 2021",
-    },
-    {
-      massage: "Hi",
-      self: true,
-      date: "24th Nov, 2021",
-    },
-    {
-      massage: "I am fine.dsf  dsfds f f dsfefewf dsfefsdf e efsdfdsfe ",
-      self: true,
-      date: "24th Nov, 2021",
-    },
-    {
-      massage: "Are you free today?",
-      self: false,
-      date: "24th Nov, 2021",
-    },
-  ];
+  const [searchinput, setsearchinput] = useState("");
+  const [search, setsearch] = useState(false);
+  const [searchload, setsearchload] = useState(false);
+  const [loadMessage, setLoadMessage] = useState(false);
+
+  const [userList, setuserList] = useState([]);
+
+  const [massagedata, setmassagedata] = useState([]);
+  const [massagedatas, setmassagedatas] = useState([]);
+
   const [active, setActive] = useState(0);
+  const [messagepage, setmessagepage] = useState(1);
+
   const [camera, setcamera] = useState(false);
   const [localstream, setlocalstream] = useState("");
   const [imagepath, setimagepath] = useState("");
   const [file, setfile] = useState("");
-  const [imgs, setimgs] = useState([]);
 
-  console.log("camera", camera, "localstream", localstream);
+  // console.log("camera", camera, "localstream", localstream);
 
   const [inputStr, setInputStr] = useState("");
   const [showPicker, setShowPicker] = useState(false);
@@ -102,6 +39,7 @@ const Home = () => {
     setInputStr((prevInput) => prevInput + emojiObject.emoji);
     // setShowPicker(false);
   };
+  // console.log(massagedata);
   const [toggle, setToggle] = useState(false);
   const Back = () => {
     video.current.pause();
@@ -113,16 +51,40 @@ const Home = () => {
       return;
     }
     let canvass = canvas.current;
-    console.log(video);
+    // console.log(video);
     let ctx = canvass.getContext("2d");
     ctx.drawImage(video.current, 0, 0, canvass.width, canvass.height);
     let canvassa = canvasa.current;
-    console.log(canvasa);
+    // console.log(canvasa);
     let ctxa = canvassa.getContext("2d");
     ctxa.drawImage(video.current, 0, 0, canvassa.width, canvassa.height);
     let image_data_url = canvass.toDataURL("image/jpeg");
     setimagepath(image_data_url);
-    console.log("me", image_data_url);
+    // console.log("me", image_data_url);
+  };
+  const Getmessage = () => {
+    axiosInstance
+      .post(`chat/`, { user: active })
+      .then((res) => {
+        // console.log(res);
+        setmassagedata(res.data.data);
+        setmassagedatas(res.data.data.messages);
+        res.data.data.nextPage && setmessagepage(messagepage + 1);
+        // console.log("me", messagediv.current.scrollHeight);
+        messagediv.current.scrollTo(0, messagediv.current.scrollHeight);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  const HandelMessageSubmit = (e) => {
+    e.preventDefault();
+    axiosInstance
+      .post("/chat/send", { receiver: active, message: inputStr })
+      .then((res) => {
+        setInputStr("");
+        Getmessage();
+      });
   };
   const Handelimage = (e) => {
     // setimgs(e.target.files);
@@ -144,6 +106,72 @@ const Home = () => {
     } else {
       setfile("");
     }
+  };
+  const Handelsearchsubmit = (e) => {
+    e.preventDefault();
+    setsearch(true);
+    setsearchload(true);
+    axiosInstance
+      .get(`user/search?user=${searchinput}&page=${1}`)
+      .then((res) => {
+        // console.log(res.data.data.users);
+        setuserList(res.data.data.users);
+        setsearchload(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setsearchload(false);
+      });
+  };
+
+  useEffect(() => {
+    if (active) {
+      Getmessage();
+    }
+  }, [active]);
+  const getUserList = () => {
+    setsearchload(true);
+    axiosInstance.post("chat/users").then((res) => {
+      // console.log("hi", res.data.data);
+      setsearchload(false);
+      setuserList(res.data.data.users);
+    });
+  };
+  useEffect(() => {
+    getUserList();
+  }, []);
+  const getscrollmessage = () => {
+    axiosInstance
+      .post(`chat?page=${messagepage}`, { user: active })
+      .then((res) => {
+        // console.log(res);
+        var data = massagedata;
+
+        // setmassagedata((old) => {
+        //   return [...old, ...res.data.data.messages];
+        // });
+        console.log("naya data", massagedata);
+        setmassagedatas([...massagedatas, ...res.data.data.messages]);
+        setLoadMessage(false);
+        res.data.data.nextPage && setmessagepage(messagepage + 1);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoadMessage(false);
+      });
+  };
+  const HandelScroll = (event) => {
+    if (
+      messagediv.current.scrollTop === 0 &&
+      massagedata.nextPage &&
+      !loadMessage
+    ) {
+      setLoadMessage(true);
+      getscrollmessage();
+    }
+    // if (event.nativeEvent.contentOffset.y === 0 && massagedata.nextPage) {
+    //   Getmessage();
+    // }
   };
 
   return (
@@ -226,8 +254,8 @@ const Home = () => {
       <section className="flex h-full ">
         <div
           style={{ transition: "0.3s ease" }}
-          className={`sm:border-r fixed sm:w-72 max-h-screen overflow-hidden sm:static z-10 flex flex-col shadow-lg  bg-gradient-to-r from-blue-500 to-blue-400 border-gray-100 ${
-            toggle ? "w-72" : "w-0"
+          className={`sm:border-r fixed  sm:w-72 h-screen flex-shrink-0 overflow-hidden sm:static z-10 flex flex-col shadow-lg  bg-gradient-to-r from-blue-500 to-blue-400 border-gray-100 ${
+            !active ? "w-full" : toggle ? "w-72" : "w-0"
           }`}
         >
           {/* Logo here */}
@@ -251,222 +279,31 @@ const Home = () => {
           <br />
           {/* Search bar */}
           <div>
-            <div className="ring-offset-1 ring-1 ring-white rounded-full  flex flex-1 items-center relative w-11/12  mx-auto my-2 ">
+            <form
+              onSubmit={Handelsearchsubmit}
+              className="ring-offset-1 ring-1 ring-white rounded-full  flex flex-1 items-center relative w-11/12  mx-auto my-2 "
+            >
               <input
+                name="searchinput"
+                required
+                value={searchinput}
+                disabled={search ? true : false}
+                onChange={(e) => {
+                  setsearchinput(e.target.value);
+                }}
                 placeholder="enter your keyboard"
                 className="rounded-2xl pr-10 hover:bg-opacity-20  transition focus:outline-none duration-200  bg-gray-500 bg-opacity-10 text-sm placeholder-gray-50 pl-4 backdrop-blur-sm text-gray-50 w-full h-10"
               />
               {/* <SearchIcon className="absolute right-4 text-gray-50" /> */}
-              <svg
-                className="w-6 h-6 absolute right-4 text-gray-50"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </div>
-          </div>
-
-          <br />
-          {/* User List */}
-          <div
-            style={{ width: "95%" }}
-            className=" flex-1 sbar mx-auto overflow-y-auto "
-          >
-            {UserList.map((data, index) => {
-              const { user, lastmassage, date } = data;
-              return (
-                <div
-                  onClick={() => {
-                    setActive(index);
-                  }}
-                  key={index}
-                  className={`flex my-1 rounded-lg flex-shrink-0 mr-2 hover:mr-0 focus:bg-blue-600 hover:bg-blue-600 cursor-pointer  p-2 gap-2 ${
-                    active === index ? "bg-blue-600" : ""
-                  }`}
-                >
-                  <div className="relative w-12 h-12">
-                    <img
-                      className="rounded-full border border-gray-100 shadow-sm"
-                      src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                      alt="user image"
-                    />
-                    <div className="absolute top-0 right-0 h-3 w-3 my-1 border-2 border-white rounded-full bg-green-400 z-2"></div>
-                  </div>
-                  <div className="flex-1 text-left text-white">
-                    <h3 className="font-semibold">{user}</h3>
-                    <div className="flex gap-1 items-center">
-                      <p className="text-sm flex-1 lastMsg overflow-hidden  text-gray-100">
-                        {lastmassage}
-                      </p>
-                      .<span className="text-xs  self-center">{date}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-        {/* Massage Component */}
-        <div className="flex-1">
-          <div className="flex h-full  flex-col">
-            <div className="flex  bg-gradient-to-r from-blue-400 to-blue-400 justify-between">
-              <div className="flex w-full  cursor-pointer  p-2 gap-2">
-                <div className="relative w-12 h-10">
-                  <img
-                    className="rounded-full border border-gray-100 shadow-sm"
-                    src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                    alt="user image"
-                  />
-                  <div className="absolute top-0 right-0 h-3 w-3 my-1 border-2 border-white rounded-full bg-green-400 z-2"></div>
-                </div>
-                <div className="flex-1 text-left text-white">
-                  <h3 className="font-semibold">Nabin Kharel</h3>
-                  <div className="flex gap-1 items-center">
-                    <p className="text-sm flex-1 lastMsg overflow-hidden text-gray-100">
-                      Active Now
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <svg
-                onClick={() => {
-                  setToggle(!toggle);
-                }}
-                className="w-6 sm:hidden cursor-pointer bg-transparent mr-2 text-white self-center h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
-                />
-              </svg>
-            </div>
-
-            <div className=" flex-1 w-full sbar mx-auto overflow-y-auto ">
-              <div className="flex p-4 flex-col gap-2 w-full items-start">
-                {massage.map((data, index) => {
-                  const { massage, self, date } = data;
-                  return (
-                    <div
-                      key={index}
-                      className={`flex w-full  ${
-                        self ? "justify-end" : "text-left"
-                      }`}
-                    >
-                      <div
-                        className={`flex gap-2 ${self && "flex-row-reverse"}`}
-                      >
-                        {!self && (
-                          <div className="relative w-9 h-9 self-center">
-                            <img
-                              className="rounded-full border border-gray-100 shadow-sm"
-                              src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                              alt="user image"
-                            />
-                            <div className="absolute top-0 right-0 h-3 w-3 my-1 border-2 border-white rounded-full bg-green-400 z-2"></div>
-                          </div>
-                        )}
-                        <div
-                          className={`rounded-3xl max-w-md  text-white py-1 px-2 ${
-                            self ? "bg-blue-400" : "bg-gray-400"
-                          }`}
-                        >
-                          {massage}
-                        </div>
-                        <div className="text-xs flex-shrink-0 text-gray-400 self-center">
-                          . {date}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="flex w-full relative items-center mx-auto bg-gradient-to-r from-blue-400 to-blue-400 cursor-pointer  p-2 gap-2">
-              {
-                <div
-                  onClick={() => {
-                    setimagepath("");
-                    setfile("");
-                  }}
-                  className={`absolute -top-full flex gap-2 bg-blue-200 ${
-                    imagepath || file ? " h-20 p-2" : "hidden"
-                  }`}
-                >
-                  <div className="p-1 absolute z-10 top-1 right-1 rounded-full bg-blue-500 text-white">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </div>
-                  <canvas
-                    ref={canvasa}
-                    className={` relative ${imagepath ? "h-16" : "h-0"}`}
-                  ></canvas>
-                  <img alt="" className="h-full" src={file} />
-                </div>
-              }
-              <svg
-                onClick={async () => {
-                  await setcamera(true);
-                  if (!video) {
-                    return;
-                  }
-                  navigator.mediaDevices
-                    .getUserMedia({ video: true })
-                    .then((stream) => {
-                      let videos = video.current;
-                      videos.srcObject = stream;
-                      setlocalstream(stream);
-                      videos.play();
-                    });
-                }}
-                className="w-7 text-white h-7"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-              <div>
-                <label htmlFor="imgfile">
+              <div className=" absolute right-4 text-gray-50">
+                {search ? (
                   <svg
-                    className="w-7 h-7 cursor-pointer text-white"
+                    onClick={() => {
+                      setsearch(false);
+                      getUserList();
+                      setsearchinput("");
+                    }}
+                    className="w-6 cursor-pointer text-white h-6"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -476,82 +313,120 @@ const Home = () => {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      d="M6 18L18 6M6 6l12 12"
                     />
                   </svg>
-                </label>
-                <input
-                  Id="imgfile"
-                  onChange={Handelimage}
-                  className="hidden"
-                  type={"file"}
-                  ref={imgfile}
-                />
-              </div>
-
-              <div className="ring-offset-1 ring-1 ring-white rounded-full  flex flex-1 items-center relative w-11/12  mx-auto my-2 ">
-                <input
-                  placeholder="Aa"
-                  className="rounded-2xl pr-10 hover:bg-opacity-20  transition focus:outline-none duration-200  bg-gray-500 bg-opacity-10 text-sm placeholder-gray-50 pl-4 backdrop-blur-sm text-gray-50 w-full h-10"
-                  value={inputStr}
-                  onChange={(e) => setInputStr(e.target.value)}
-                />
-                <svg
-                  onClick={() => setShowPicker((val) => !val)}
-                  className="w-6 h-6 absolute right-4 text-gray-50"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                {/* <img
-                  className="emoji-icon"
-                  src="https://icons.getbootstrap.com/assets/icons/emoji-smile.svg"
-                  onClick={() => setShowPicker((val) => !val)}
-                /> */}
-                {showPicker && (
-                  <div>
-                    <div className="absolute bottom-full z-20 w-72 right-2">
-                      <Picker
-                        pickerStyle={{ width: "100%" }}
-                        onEmojiClick={onEmojiClick}
+                ) : (
+                  <button>
+                    <svg
+                      className="w-6 h-6  text-gray-50"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                       />
-                    </div>
-                    <div
-                      onClick={() => {
-                        setShowPicker(false);
-                      }}
-                      className="h-screen top-0 left-0  z-10 fixed w-full"
-                    ></div>
-                  </div>
+                    </svg>
+                  </button>
                 )}
               </div>
-              <div className="p-2 rounded-full">
-                <svg
-                  className="w-6 text-white transform rotate-90 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                  />
-                </svg>
-              </div>
-            </div>
+            </form>
+          </div>
+
+          <br />
+          {/* User List */}
+          <div
+            style={{ width: "95%" }}
+            className=" flex-1 sbar mx-auto overflow-y-auto "
+          >
+            {!searchload &&
+              userList.map((data, index) => {
+                const { username, _id, lastMessage } = data;
+                console.log(username);
+                return (
+                  <div
+                    onClick={() => {
+                      setActive(_id);
+                    }}
+                    key={index}
+                    className={`flex my-1 rounded-lg flex-shrink-0 mr-2 hover:mr-0 focus:bg-blue-600 hover:bg-blue-600 cursor-pointer  p-2 gap-2 ${
+                      active === _id ? "bg-blue-600" : ""
+                    }`}
+                  >
+                    <div className="relative w-12 h-12">
+                      <img
+                        className="rounded-full border border-gray-100 shadow-sm"
+                        src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                        alt="username image"
+                      />
+                      <div className="absolute top-0 right-0 h-3 w-3 my-1 border-2 border-white rounded-full bg-green-400 z-2"></div>
+                    </div>
+                    <div className="flex-1 text-left text-white">
+                      <h3 className="font-semibold">{username}</h3>
+                      {lastMessage && (
+                        <div className="flex gap-1 items-center">
+                          <p className="text-sm flex-1 lastMsg overflow-hidden  text-gray-100">
+                            {lastMessage && lastMessage.message}
+                          </p>
+                          <span className="text-xs  self-center">
+                            {lastMessage &&
+                              moment(lastMessage.time).format(
+                                "ddd MMM DD YYYY"
+                              )}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+
+            {searchload && (
+              <div className="text-white font-medium">Loading . . .</div>
+            )}
+            {!searchload && search && userList.length === 0 && (
+              <div className="text-white font-medium">User Not found</div>
+            )}
           </div>
         </div>
+        {/* Massage Component */}
+        {active ? (
+          <div className="flex-1">
+            <Messanger
+              imgfile={imgfile}
+              setlocalstream={setlocalstream}
+              video={video}
+              setcamera={setcamera}
+              imagepath={imagepath}
+              canvasa={canvasa}
+              file={file}
+              imagepath={imagepath}
+              setfile={setfile}
+              setimagepath={setimagepath}
+              HandelMessageSubmit={HandelMessageSubmit}
+              loadMessage={loadMessage}
+              massagedatas={massagedatas}
+              setToggle={setToggle}
+              toggle={toggle}
+              messagediv={messagediv}
+              HandelScroll={HandelScroll}
+              setInputStr={setInputStr}
+              showPicker={showPicker}
+              setShowPicker={setShowPicker}
+              inputStr={inputStr}
+              onEmojiClick={onEmojiClick}
+              getscrollmessage={getscrollmessage}
+              massagedata={massagedata}
+            />
+          </div>
+        ) : (
+          <Intro />
+        )}
       </section>
     </div>
   );
