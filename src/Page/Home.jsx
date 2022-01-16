@@ -5,6 +5,11 @@ import { useEffect } from "react";
 import Intro from "../Components/Intro";
 import moment from "moment";
 import Messanger from "./Messanger";
+import Search from "../assets/icon/Search";
+import Cross from "../assets/icon/Cross";
+import Camera from "../assets/icon/Camera";
+import CameraPop from "../Components/CameraPop";
+import Sidebar from "../Components/Sidebar";
 const Home = () => {
   const video = useRef();
   const canvas = useRef();
@@ -177,223 +182,30 @@ const Home = () => {
   return (
     <div className="h-screen">
       {camera && (
-        <div className="fixed  h-screen w-screen bg-gray-500  z-20">
-          <div className="relative mx-auto   w-full h-full">
-            {" "}
-            <video
-              style={{ width: "100%", height: "100%" }}
-              height={"100%"}
-              ref={video}
-              autoPlay
-            ></video>
-            <canvas
-              className="absolute top-10 right-10"
-              ref={canvas}
-              width="320"
-              height="240"
-            ></canvas>
-            <div className="absolute top-2 left-2">
-              <div
-                onClick={() => {
-                  Back();
-                }}
-                className=" bg-blue-500 cursor-pointer rounded-full flex justify-center items-center  w-14 h-14"
-              >
-                <svg
-                  className="w-7 h-7 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-              </div>
-            </div>
-            <div className="absolute z-50 right-0 left-0 bottom-20 sm:bottom-12 mx-auto">
-              <div className="flex justify-center gap-2">
-                {" "}
-                <div
-                  onClick={() => {
-                    ClickPhoto();
-                  }}
-                  className=" bg-blue-500 cursor-pointer rounded-full flex justify-center items-center  w-14 h-14"
-                >
-                  <svg
-                    className="w-8 text-white h-8"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <CameraPop
+          Back={Back}
+          ClickPhoto={ClickPhoto}
+          video={video}
+          canvas={canvas}
+        />
       )}
 
       <section className="flex h-full ">
-        <div
-          style={{ transition: "0.3s ease" }}
-          className={`sm:border-r fixed  sm:w-72 h-screen flex-shrink-0 overflow-hidden sm:static z-10 flex flex-col shadow-lg  bg-gradient-to-r from-blue-500 to-blue-400 border-gray-100 ${
-            !active ? "w-full" : toggle ? "w-72" : "w-0"
-          }`}
-        >
-          {/* Logo here */}
-          <h1 className=" text-3xl flex gap-1 py-3  border-b-2 border-white text-center justify-center font-bold text-white">
-            Messenger
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-              />
-            </svg>
-          </h1>
-          <br />
-          {/* Search bar */}
-          <div>
-            <form
-              onSubmit={Handelsearchsubmit}
-              className="ring-offset-1 ring-1 ring-white rounded-full  flex flex-1 items-center relative w-11/12  mx-auto my-2 "
-            >
-              <input
-                name="searchinput"
-                required
-                value={searchinput}
-                disabled={search ? true : false}
-                onChange={(e) => {
-                  setsearchinput(e.target.value);
-                }}
-                placeholder="enter your keyboard"
-                className="rounded-2xl pr-10 hover:bg-opacity-20  transition focus:outline-none duration-200  bg-gray-500 bg-opacity-10 text-sm placeholder-gray-50 pl-4 backdrop-blur-sm text-gray-50 w-full h-10"
-              />
-              {/* <SearchIcon className="absolute right-4 text-gray-50" /> */}
-              <div className=" absolute right-4 text-gray-50">
-                {search ? (
-                  <svg
-                    onClick={() => {
-                      setsearch(false);
-                      getUserList();
-                      setsearchinput("");
-                    }}
-                    className="w-6 cursor-pointer text-white h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                ) : (
-                  <button>
-                    <svg
-                      className="w-6 h-6  text-gray-50"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                      />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            </form>
-          </div>
-
-          <br />
-          {/* User List */}
-          <div
-            style={{ width: "95%" }}
-            className=" flex-1 sbar mx-auto overflow-y-auto "
-          >
-            {!searchload &&
-              userList.map((data, index) => {
-                const { username, _id, lastMessage } = data;
-                console.log(username);
-                return (
-                  <div
-                    onClick={() => {
-                      setActive(_id);
-                    }}
-                    key={index}
-                    className={`flex my-1 rounded-lg flex-shrink-0 mr-2 hover:mr-0 focus:bg-blue-600 hover:bg-blue-600 cursor-pointer  p-2 gap-2 ${
-                      active === _id ? "bg-blue-600" : ""
-                    }`}
-                  >
-                    <div className="relative w-12 h-12">
-                      <img
-                        className="rounded-full border border-gray-100 shadow-sm"
-                        src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                        alt="username image"
-                      />
-                      <div className="absolute top-0 right-0 h-3 w-3 my-1 border-2 border-white rounded-full bg-green-400 z-2"></div>
-                    </div>
-                    <div className="flex-1 text-left text-white">
-                      <h3 className="font-semibold">{username}</h3>
-                      {lastMessage && (
-                        <div className="flex gap-1 items-center">
-                          <p className="text-sm flex-1 lastMsg overflow-hidden  text-gray-100">
-                            {lastMessage && lastMessage.message}
-                          </p>
-                          <span className="text-xs  self-center">
-                            {lastMessage &&
-                              moment(lastMessage.time).format(
-                                "ddd MMM DD YYYY"
-                              )}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-
-            {searchload && (
-              <div className="text-white font-medium">Loading . . .</div>
-            )}
-            {!searchload && search && userList.length === 0 && (
-              <div className="text-white font-medium">User Not found</div>
-            )}
-          </div>
-        </div>
+        <Sidebar
+          setActive={setActive}
+          userList={userList}
+          searchload={searchload}
+          getUserList={getUserList}
+          setsearch={setsearch}
+          Cross={Cross}
+          search={search}
+          Search={Search}
+          searchinput={searchinput}
+          setsearchinput={setsearchinput}
+          active={active}
+          toggle={toggle}
+          Handelsearchsubmit={Handelsearchsubmit}
+        />
         {/* Massage Component */}
         {active ? (
           <div className="flex-1">
