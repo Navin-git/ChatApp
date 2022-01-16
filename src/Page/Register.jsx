@@ -90,14 +90,12 @@ const Register = () => {
     setDataCheck(true);
   };
   useEffect(() => {
-    console.log("vKO Zz");
     if (Object.keys(error).length === 0 && dataCheck) {
       setprocess(true);
 
       axiosInstance
         .post("user/register", { username, email, password })
         .then((res) => {
-          console.log(res);
           if (res.data.status === "success") {
             localStorage.setItem("token", res.data.token);
 
@@ -109,19 +107,16 @@ const Register = () => {
 
             window.location.assign("/");
           } else {
-            console.log(res.data.errors);
             setbackerror((pre) => {
               return {
                 ...pre,
                 ...res.data.errors,
               };
             });
-            console.log(backerror);
           }
           setprocess(false);
         })
         .catch((err) => {
-          console.log(err);
           toast.error(err.response && err.response.data.error, {
             position: "top-right",
             autoClose: 5000,
@@ -134,8 +129,8 @@ const Register = () => {
           setprocess(false);
         });
     }
-    setDataCheck(false);
-  }, [dataCheck]);
+    !process && setDataCheck(false);
+  }, [dataCheck, email, username, password, error, process]);
 
   return (
     <div className="w-full bg-blue-100 min-h-screen  flex justify-center items-center">
@@ -166,7 +161,6 @@ const Register = () => {
                     <div className="h-2 w-2 left-3 transform rotate-45 -top-1 absolute bg-red-500"></div>
                   </div>
                 )}
-                {console.log(error)}
                 {error && (
                   <div className="bg-red-500 relative text-white rounded mt-1 text-sm text-center">
                     <p> {error}</p>

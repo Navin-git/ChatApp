@@ -1,5 +1,5 @@
 import axios from "axios";
-const path = "https://warm-badlands-28984.herokuapp.com/api/";
+const path = "http://127.0.0.1:8000/api/";
 const axiosInstance = axios.create({
   baseURL: path,
   headers: {

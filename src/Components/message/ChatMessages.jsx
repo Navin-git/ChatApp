@@ -1,75 +1,99 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Picker from "emoji-picker-react";
 import moment from "moment";
-import Photo from "../assets/icon/Photo";
-import Emoji from "../assets/icon/Emoji";
-import Send from "../assets/icon/Send";
+import axiosInstance from "../../API/AxiosInstance";
+import Photo from "../../assets/icon/Photo";
+import Emoji from "../../assets/icon/Emoji";
+import Send from "../../assets/icon/Send";
+import ChatHeader from "./ChatHeader";
 
-const Messanger = ({
-  onEmojiClick,
-  setInputStr,
+const ChatMessages = ({
   showPicker,
   setShowPicker,
-  inputStr,
   imgfile,
-  Handelimage,
-  setlocalstream,
+  handleChangeImage,
   video,
-  setcamera,
   canvasa,
-  file,
-  imagepath,
-  setfile,
-  setimagepath,
-  HandelMessageSubmit,
-  setToggle,
+  active,
+  setcamera,
   toggle,
-  messagediv,
-  HandelScroll,
-  massagedatas,
-  loadMessage,
-  getscrollmessage,
-  massagedata,
+  setToggle,
+  file,
+  setfile,
+  imagepath,
+  setimagepath,
+  setlocalstream,
+  fetchingMessages,
+  setFetchingMessages,
 }) => {
+  const [messages, setMessages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [nextPage, setNextPage] = useState(false);
+  const [inputStr, setInputStr] = useState("");
+
+  const messagediv = useRef();
+
+  const { _id: userId, username } = active;
+
+  const getMessage = useRef();
+  getMessage.current = async () => {
+    await axiosInstance
+      .post(`chat/`, { user: userId })
+      .then((res) => {
+        if (res?.data?.data) {
+          const { messages, nextPage } = res.data.data;
+          setNextPage(nextPage);
+          setMessages(() => messages || []);
+          setPage(() => (nextPage ? page + 1 : false));
+        }
+        messagediv.current.scrollTo(0, messagediv.current.scrollHeight);
+      })
+      .catch(() => {});
+
+    setFetchingMessages(false);
+  };
+
+  const onEmojiClick = (event, emojiObject) => {
+    setInputStr((prevInput) => prevInput + emojiObject.emoji);
+  };
+
+  const handleMessageSubmit = (e) => {
+    e.preventDefault();
+    axiosInstance
+      .post("/chat/send", { receiver: userId, message: inputStr })
+      .then((res) => {
+        setInputStr("");
+        getMessage.current();
+      });
+  };
+
+  const getscrollmessage = () => {
+    axiosInstance
+      .post(`chat?page=${page}`, { user: userId })
+      .then((res) => {
+        setMessages([...messages, ...res.data.data.messages]);
+        setFetchingMessages(false);
+        res.data.data.nextPage && setPage(page + 1);
+      })
+      .catch((err) => {
+        setFetchingMessages(false);
+      });
+  };
+
+  const HandelScroll = (event) => {
+    if (messagediv.current.scrollTop === 0 && nextPage && !fetchingMessages) {
+      setFetchingMessages(true);
+      getscrollmessage();
+    }
+  };
+
+  useEffect(() => {
+    fetchingMessages && getMessage.current();
+  }, [fetchingMessages]);
+
   return (
     <div className="flex h-full  flex-col">
-      <div className="flex  bg-gradient-to-r from-blue-400 to-blue-400 justify-between">
-        <div className="flex w-full  cursor-pointer  p-2 gap-2">
-          <div className="relative w-12 h-10">
-            <img
-              className="rounded-full border border-gray-100 shadow-sm"
-              src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-              alt="user image"
-            />
-            <div className="absolute top-0 right-0 h-3 w-3 my-1 border-2 border-white rounded-full bg-green-400 z-2"></div>
-          </div>
-          <div className="flex-1 text-left text-white">
-            <h3 className="font-semibold">Nabin Kharel</h3>
-            <div className="flex gap-1 items-center">
-              <p className="text-sm flex-1 lastMsg overflow-hidden text-gray-100">
-                Active Now
-              </p>
-            </div>
-          </div>
-        </div>
-        <svg
-          onClick={() => {
-            setToggle(!toggle);
-          }}
-          className="w-6 sm:hidden cursor-pointer bg-transparent mr-2 text-white self-center h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
-          />
-        </svg>
-      </div>
+      <ChatHeader username={username} toggle={toggle} setToggle={setToggle} />
 
       <div
         ref={messagediv}
@@ -77,32 +101,33 @@ const Messanger = ({
         className=" flex-1 w-full  sbar mx-auto overflow-y-auto "
       >
         <div className="flex p-4 flex-col-reverse gap-5 w-full items-start">
-          {Array.isArray(massagedatas) &&
-            massagedatas.map((data, index) => {
-              const { message, recevide, time, _id } = data;
+          {!fetchingMessages &&
+            Array.isArray(messages) &&
+            messages.map((data, index) => {
+              const { message, received, time } = data;
               return (
                 <div
                   key={index}
                   className={`flex w-full  ${
-                    !recevide ? "justify-end text-right" : "text-left"
+                    !received ? "justify-end text-right" : "text-left"
                   }`}
                 >
                   <div
-                    className={`flex gap-2 ${!recevide && "flex-row-reverse"}`}
+                    className={`flex gap-2 ${!received && "flex-row-reverse"}`}
                   >
-                    {recevide && (
+                    {received && (
                       <div className="relative w-9 h-9 self-center">
                         <img
                           className="rounded-full border border-gray-100 shadow-sm"
                           src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                          alt="user image"
+                          alt="user profile"
                         />
                         <div className="absolute top-0 right-0 h-3 w-3 my-1 border-2 border-white rounded-full bg-green-400 z-2"></div>
                       </div>
                     )}
                     <div
                       className={`rounded-3xl max-w-md text-lg text-white py-1 px-2 ${
-                        !recevide ? "bg-blue-400" : "bg-gray-400"
+                        !received ? "bg-blue-400" : "bg-gray-400"
                       }`}
                     >
                       {message}
@@ -114,7 +139,7 @@ const Messanger = ({
                 </div>
               );
             })}
-          {loadMessage && (
+          {fetchingMessages && (
             <div className="text-gray-600 mx-auto font-medium">
               Loading . . .
             </div>
@@ -122,7 +147,7 @@ const Messanger = ({
         </div>
       </div>
       <form
-        onSubmit={HandelMessageSubmit}
+        onSubmit={handleMessageSubmit}
         className="flex w-full relative items-center mx-auto bg-gradient-to-r from-blue-400 to-blue-400 cursor-pointer  p-2 gap-2"
       >
         {
@@ -197,8 +222,8 @@ const Messanger = ({
             <Photo />
           </label>
           <input
-            Id="imgfile"
-            onChange={Handelimage}
+            id="imgfile"
+            onChange={handleChangeImage}
             className="hidden"
             type={"file"}
             ref={imgfile}
@@ -213,11 +238,6 @@ const Messanger = ({
             onChange={(e) => setInputStr(e.target.value)}
           />
           <Emoji setShowPicker={setShowPicker} />
-          {/* <img
-        className="emoji-icon"
-        src="https://icons.getbootstrap.com/assets/icons/emoji-smile.svg"
-        onClick={() => setShowPicker((val) => !val)}
-      /> */}
           {showPicker && (
             <div>
               <div className="absolute bottom-full z-20 w-72 right-2">
@@ -242,4 +262,4 @@ const Messanger = ({
     </div>
   );
 };
-export default Messanger;
+export default ChatMessages;

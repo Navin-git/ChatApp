@@ -1,12 +1,9 @@
 import React from "react";
-const Cross = ({ setsearch, getUserList, setsearchinput }) => {
+
+const Cross = ({ handleClick }) => {
   return (
     <svg
-      onClick={() => {
-        setsearch(false);
-        getUserList();
-        setsearchinput("");
-      }}
+      onClick={handleClick}
       className="w-6 cursor-pointer text-white h-6"
       fill="none"
       stroke="currentColor"

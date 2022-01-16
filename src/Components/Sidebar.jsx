@@ -1,21 +1,44 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import moment from "moment";
-const Sidebar = ({
-  setActive,
-  userList,
-  searchload,
-  getUserList,
-  setsearch,
-  Cross,
-  Search,
-  search,
-  searchinput,
-  setsearchinput,
+import Search from "../assets/icon/Search";
+import Cross from "../assets/icon/Cross";
+import axiosInstance from "../API/AxiosInstance";
 
-  active,
-  toggle,
-  Handelsearchsubmit,
-}) => {
+const Sidebar = ({ handleChange, active, toggle }) => {
+  const [search, setSearch] = useState("");
+  const [users, setUsers] = useState([]);
+  const [fetchingUsers, setFetchingUsers] = useState(true);
+  const [searchingUsers, setSearchingUsers] = useState(false);
+
+  const searchInputField = useRef();
+  const page = 1;
+
+  const getUsers = useRef();
+  getUsers.current = () => {
+    axiosInstance.post("chat/users").then((res) => {
+      setUsers(() => res?.data?.data?.users || []);
+      setFetchingUsers(false);
+    });
+  };
+
+  const handleSearchSubmit = async (e) => {
+    e.preventDefault();
+    setSearchingUsers(true);
+    await axiosInstance
+      .get(`user/search?user=${search}&page=${page}`)
+      .then((res) => {
+        setUsers(() => res?.data?.data?.users || []);
+      })
+      .catch(() => {});
+
+    setSearchingUsers(false);
+    searchInputField.current.focus();
+  };
+
+  useEffect(() => {
+    fetchingUsers && getUsers.current();
+  }, [fetchingUsers]);
+
   return (
     <div
       style={{ transition: "0.3s ease" }}
@@ -45,17 +68,18 @@ const Sidebar = ({
       {/* Search bar */}
       <div>
         <form
-          onSubmit={Handelsearchsubmit}
+          onSubmit={handleSearchSubmit}
           className="ring-offset-1 ring-1 ring-white rounded-full  flex flex-1 items-center relative w-11/12  mx-auto my-2 "
         >
           <input
             name="searchinput"
             required
-            value={searchinput}
-            disabled={search ? true : false}
+            value={search}
+            disabled={searchingUsers ? true : false}
             onChange={(e) => {
-              setsearchinput(e.target.value);
+              !searchingUsers && setSearch(e.target.value);
             }}
+            ref={searchInputField}
             placeholder="enter your keyboard"
             className="rounded-2xl pr-10 hover:bg-opacity-20  transition focus:outline-none duration-200  bg-gray-500 bg-opacity-10 text-sm placeholder-gray-50 pl-4 backdrop-blur-sm text-gray-50 w-full h-10"
           />
@@ -63,9 +87,11 @@ const Sidebar = ({
           <div className=" absolute right-4 text-gray-50">
             {search ? (
               <Cross
-                setsearch={setsearch}
-                getUserList={getUserList}
-                setsearchinput={setsearchinput}
+                handleClick={() => {
+                  setSearchingUsers(false);
+                  getUsers.current();
+                  setSearch("");
+                }}
               />
             ) : (
               <button>
@@ -82,25 +108,23 @@ const Sidebar = ({
         style={{ width: "95%" }}
         className=" flex-1 sbar mx-auto overflow-y-auto "
       >
-        {!searchload &&
-          userList.map((data, index) => {
-            const { username, _id, lastMessage } = data;
-            console.log(username);
+        {!searchingUsers &&
+          !fetchingUsers &&
+          users.map((user, index) => {
+            const { username, _id, lastMessage } = user;
             return (
               <div
-                onClick={() => {
-                  setActive(_id);
-                }}
+                onClick={() => handleChange(user)}
                 key={index}
                 className={`flex my-1 rounded-lg flex-shrink-0 mr-2 hover:mr-0 focus:bg-blue-600 hover:bg-blue-600 cursor-pointer  p-2 gap-2 ${
-                  active === _id ? "bg-blue-600" : ""
+                  active?._id === _id ? "bg-blue-600" : ""
                 }`}
               >
                 <div className="relative w-12 h-12">
                   <img
                     className="rounded-full border border-gray-100 shadow-sm"
                     src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                    alt="username image"
+                    alt="user profile"
                   />
                   <div className="absolute top-0 right-0 h-3 w-3 my-1 border-2 border-white rounded-full bg-green-400 z-2"></div>
                 </div>
@@ -122,10 +146,10 @@ const Sidebar = ({
             );
           })}
 
-        {searchload && (
+        {(searchingUsers || fetchingUsers) && (
           <div className="text-white font-medium">Loading . . .</div>
         )}
-        {!searchload && search && userList.length === 0 && (
+        {!searchingUsers && !fetchingUsers && users.length === 0 && (
           <div className="text-white font-medium">User Not found</div>
         )}
       </div>

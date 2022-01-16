@@ -68,7 +68,6 @@ const Signin = () => {
       axiosInstance
         .post("user/login", { email, password })
         .then((res) => {
-          console.log(res);
           if (res.data.status === "success") {
             setinput({
               username: "",
@@ -78,7 +77,6 @@ const Signin = () => {
             localStorage.setItem("token", res.data.token);
             window.location.assign("/");
           } else {
-            console.log(res.data.error);
             toast.error(res.data.error, {
               position: "top-right",
               autoClose: 5000,
@@ -93,7 +91,6 @@ const Signin = () => {
           setprocess(false);
         })
         .catch((err) => {
-          console.log(err);
           toast.error("Something went wrong", {
             position: "top-right",
             autoClose: 5000,
@@ -106,8 +103,8 @@ const Signin = () => {
           setprocess(false);
         });
     }
-    setDataCheck(false);
-  }, [dataCheck]);
+    !process && setDataCheck(false);
+  }, [dataCheck, email, error, password, process]);
   return (
     <div className="w-full bg-blue-100 min-h-screen  flex justify-center items-center">
       <form
