@@ -1,69 +1,35 @@
-import "./App.css";
 import React, { useEffect, useState } from "react";
 import { Switch, Route } from "react-router-dom";
+import { Redirect } from "react-router-dom/cjs/react-router-dom.min";
+import { ToastContainer } from "react-toastify";
+import io from "socket.io-client";
 import Home from "./Page/Home";
 import Register from "./Page/Register";
 import Signin from "./Page/Signin";
-import jwtDecode from "jwt-decode";
-import socketIoClient from "socket.io-client";
-import { Redirect } from "react-router-dom/cjs/react-router-dom.min";
 import axiosInstance from "./API/AxiosInstance";
-// import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer, toast } from "react-toastify";
+import "./App.css";
 
-const socket = socketIoClient("");
+const socket = io("http://127.0.0.1:8000", {
+  transports: ["websocket", "polling"],
+});
 
 function App() {
   const [validityCheck, setValidityCheck] = useState(false);
   const [valid, setValid] = useState(false);
-  const showNotification = () => {
-    var notification = new Notification("hi", { body: "body" });
-  };
-  console.log(Notification.permission);
 
   useEffect(() => {
-    if (Notification.permission === "granted") {
-      showNotification();
-      alert("we have permision");
-    } else if (Notification.permission != "denied") {
-      Notification.requestPermission().then(function (permission) {
-        console.log(permission);
-        if (permission === "granted") {
-          showNotification();
-          alert("we have permision");
-        }
+    axiosInstance
+      .post(`user/verify-jwt/`)
+      .then((res) => {
+        setValid(true);
+        setValidityCheck(true);
+      })
+      .catch((err) => {
+        setValid(false);
+        setValidityCheck(true);
       });
-    }
-    {
-      axiosInstance
-        .post(`user/verify-jwt/`)
-        .then((res) => {
-          console.log(res);
-          setValid(true);
-          setValidityCheck(true);
-        })
-        .catch((err) => {
-          console.log(err);
-          setValid(false);
-          setValidityCheck(true);
-        });
-    }
   }, []);
-  console.log(valid);
-  const token = localStorage.getItem("token");
-  const [decoded, setdecoded] = useState({});
-  useEffect(() => {
-    if (token) {
-      try {
-        setdecoded(jwtDecode(token));
-      } catch (e) {
-        localStorage.clear();
-      }
-    }
-  }, []);
-
-  console.log("decode", decoded);
 
   const HandelCheck = () => {
     return valid ? (
@@ -80,7 +46,6 @@ function App() {
   };
 
   const HandelCheckAuth = (comp) => {
-    console.log(comp);
     return valid ? (
       validityCheck ? (
         <Redirect to="/" />
@@ -93,6 +58,25 @@ function App() {
       <div>Loading</div>
     );
   };
+
+  useEffect(() => {
+    if (valid) {
+      const token = localStorage.getItem("token");
+      socket.emit("join", { token }, (err) => {
+        if (err) {
+          const { status } = err;
+          if (status === 401) {
+            localStorage.removeItem("token");
+            window.location = "/signin";
+          }
+        }
+      });
+
+      socket.on("receiveMessage", (data) => {
+        console.log(data);
+      });
+    }
+  }, [valid]);
 
   return (
     <div className="App">
