@@ -1,12 +1,16 @@
 import React, { useState, useRef } from "react";
 import Picker from "emoji-picker-react";
-import axiosInstance from "../../API/AxiosInstance";
+import io from "socket.io-client";
 import CameraPop from "../../Components/CameraPop";
 import Photo from "../../assets/icon/Photo";
 import Emoji from "../../assets/icon/Emoji";
 import Send from "../../assets/icon/Send";
 import Camera from "../../assets/icon/Camera";
 import Cross from "../../assets/icon/Cross";
+
+const socket = io("http://127.0.0.1:8000", {
+  transports: ["websocket", "polling"],
+});
 
 const SendMessage = ({ active, getMessage }) => {
   const video = useRef();
@@ -29,12 +33,17 @@ const SendMessage = ({ active, getMessage }) => {
 
   const handleMessageSubmit = (e) => {
     e.preventDefault();
-    axiosInstance
-      .post("/chat/send", { receiver: userId, message: inputStr })
-      .then((res) => {
-        setInputStr("");
-        getMessage();
-      });
+    socket.emit("sendMessage", {
+      token: localStorage.getItem("token"),
+      receiver: userId,
+      message: inputStr,
+    });
+    // axiosInstance
+    //   .post("/chat/send", { receiver: userId, message: inputStr })
+    //   .then((res) => {
+    //     setInputStr("");
+    //     getMessage();
+    //   });
   };
 
   const Back = () => {

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Switch, Route } from "react-router-dom";
-// import io from "socket.io-client";
 import { Redirect } from "react-router-dom/cjs/react-router-dom.min";
 import { ToastContainer } from "react-toastify";
+import io from "socket.io-client";
 import Home from "./Page/Home";
 import Register from "./Page/Register";
 import Signin from "./Page/Signin";
@@ -10,9 +10,9 @@ import axiosInstance from "./API/AxiosInstance";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
-// const socket = io("http://127.0.0.1:8000", {
-//   transports: ["websocket", "polling"],
-// });
+const socket = io("http://127.0.0.1:8000", {
+  transports: ["websocket", "polling"],
+});
 
 function App() {
   const [validityCheck, setValidityCheck] = useState(false);
@@ -58,6 +58,25 @@ function App() {
       <div>Loading</div>
     );
   };
+
+  useEffect(() => {
+    if (valid) {
+      const token = localStorage.getItem("token");
+      socket.emit("join", { token }, (err) => {
+        if (err) {
+          const { status } = err;
+          if (status === 401) {
+            localStorage.removeItem("token");
+            window.location = "/signin";
+          }
+        }
+      });
+
+      socket.on("receiveMessage", (data) => {
+        console.log(data);
+      });
+    }
+  }, [valid]);
 
   return (
     <div className="App">
