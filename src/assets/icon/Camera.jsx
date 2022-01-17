@@ -1,5 +1,6 @@
 import React from "react";
-const Camera = () => {
+
+const Camera = ({ handleClick }) => {
   return (
     <svg
       className="w-8 text-white h-8"
@@ -7,6 +8,7 @@ const Camera = () => {
       stroke="currentColor"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
+      onClick={handleClick}
     >
       <path
         strokeLinecap="round"
