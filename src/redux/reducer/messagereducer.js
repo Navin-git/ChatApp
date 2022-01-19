@@ -1,30 +1,30 @@
 import {
-  FETCH_POST_REQUEST,
-  FETCH_POST_SUCCESS,
-  FETCH_POST_ERROR,
+  FETCH_MESSAGE_REQUEST,
+  FETCH_MESSAGE_SUCCESS,
+  FETCH_MESSAGE_ERROR,
 } from "../actions/actionType";
 
 const initialState = {
-  posts: [],
+  messagedata: [],
   fetching: false,
   error: [],
 };
 
-const reducer = (state = initialState, action) => {
+const messageReducer = (state = initialState, action) => {
   const { type, payload } = action;
   switch (type) {
-    case FETCH_POST_REQUEST:
+    case FETCH_MESSAGE_REQUEST:
       return {
         ...state,
         fetching: true,
       };
-    case FETCH_POST_SUCCESS:
+    case FETCH_MESSAGE_SUCCESS:
       return {
         ...state,
-        posts: payload,
+        messagedata: payload,
         fetching: false,
       };
-    case FETCH_POST_ERROR:
+    case FETCH_MESSAGE_ERROR:
       return {
         ...state,
         error: payload,
@@ -35,4 +35,4 @@ const reducer = (state = initialState, action) => {
   }
 };
 
-export default reducer;
+export default messageReducer;

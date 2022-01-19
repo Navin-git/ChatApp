@@ -3,6 +3,11 @@ import axiosInstance from "../../API/AxiosInstance";
 import ChatHeader from "./ChatHeader";
 import SendMessage from "./SendMessage";
 import IndividualMessage from "./IndividualMessage";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetch_message,
+  fetch_scroll_message,
+} from "../../redux/actions/messageAction";
 
 const ChatMessages = ({
   active,
@@ -11,48 +16,53 @@ const ChatMessages = ({
   fetchingMessages,
   setFetchingMessages,
 }) => {
-  const [messages, setMessages] = useState([]);
   const [page, setPage] = useState(1);
-  const [nextPage, setNextPage] = useState(false);
+  const [fetchingscrollMessages, setfetchingscrollMessages] = useState(false);
+  const [nextpage, setNextPage] = useState(false);
+  console.log("me", nextpage);
 
   const messagediv = useRef();
+  const dispatch = useDispatch();
+  const { messagedata } = useSelector((store) => store.messageReducer);
 
   const { _id: userId, username } = active;
 
   const getMessage = useRef();
   getMessage.current = async () => {
-    await axiosInstance
-      .post(`chat/`, { user: userId })
-      .then((res) => {
-        if (res?.data?.data) {
-          const { messages, nextPage } = res.data.data;
-          setNextPage(nextPage);
-          setMessages(() => messages || []);
-          setPage(() => (nextPage ? page + 1 : false));
-        }
-        messagediv.current.scrollTo(0, messagediv.current.scrollHeight);
-      })
-      .catch(() => {});
-
+    await dispatch(
+      fetch_message(
+        axiosInstance,
+        userId,
+        setNextPage,
+        setPage,
+        page,
+        messagediv
+      )
+    );
+    // messagediv.current.scrollTo(0, messagediv.current.scrollHeight);
+    console.log(messagediv.current.scrollHeight);
     setFetchingMessages(false);
   };
 
-  const getscrollmessage = () => {
-    axiosInstance
-      .post(`chat?page=${page}`, { user: userId })
-      .then((res) => {
-        setMessages([...messages, ...res.data.data.messages]);
-        setFetchingMessages(false);
-        res.data.data.nextPage && setPage(page + 1);
-      })
-      .catch((err) => {
-        setFetchingMessages(false);
-      });
+  const getscrollmessage = async () => {
+    await dispatch(
+      fetch_scroll_message(
+        axiosInstance,
+        userId,
+        setPage,
+        page,
+        messagedata,
+        setNextPage
+      )
+    );
+    setFetchingMessages(false);
+    setfetchingscrollMessages(false);
   };
 
   const HandelScroll = (event) => {
-    if (messagediv.current.scrollTop === 0 && nextPage && !fetchingMessages) {
-      setFetchingMessages(true);
+    if (messagediv.current.scrollTop === 0 && nextpage && !fetchingMessages) {
+      // setFetchingMessages(true);
+      setfetchingscrollMessages(true);
       getscrollmessage();
     }
   };
@@ -72,11 +82,11 @@ const ChatMessages = ({
       >
         <div className="flex p-4 flex-col-reverse gap-5 w-full items-start">
           {!fetchingMessages &&
-            Array.isArray(messages) &&
-            messages.map((data, index) => (
+            Array.isArray(messagedata) &&
+            messagedata.map((data, index) => (
               <IndividualMessage key={index} {...data} />
             ))}
-          {fetchingMessages && (
+          {fetchingscrollMessages && (
             <div className="text-gray-600 mx-auto font-medium">
               Loading . . .
             </div>
