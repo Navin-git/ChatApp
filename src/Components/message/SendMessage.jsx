@@ -8,7 +8,7 @@ import Send from "../../assets/icon/Send";
 import Camera from "../../assets/icon/Camera";
 import Cross from "../../assets/icon/Cross";
 
-const socket = io("http://127.0.0.1:8000", {
+const socket = io("https://warm-badlands-28984.herokuapp.com", {
   transports: ["websocket", "polling"],
 });
 

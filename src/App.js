@@ -10,7 +10,7 @@ import axiosInstance from "./API/AxiosInstance";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
-const socket = io("http://127.0.0.1:8000", {
+const socket = io("https://warm-badlands-28984.herokuapp.com", {
   transports: ["websocket", "polling"],
 });
 

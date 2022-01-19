@@ -3,36 +3,27 @@ import moment from "moment";
 import Search from "../assets/icon/Search";
 import Cross from "../assets/icon/Cross";
 import axiosInstance from "../API/AxiosInstance";
+import { fetch_User, handleSearchSubmit } from "../redux/actions/actions";
+import { useSelector, useDispatch } from "react-redux";
 
 const Sidebar = ({ handleChange, active, toggle }) => {
   const [search, setSearch] = useState("");
-  const [users, setUsers] = useState([]);
+  // const [users, setUsers] = useState([]);
   const [fetchingUsers, setFetchingUsers] = useState(true);
   const [searchingUsers, setSearchingUsers] = useState(false);
+  const [issearch, setissearch] = useState(false);
+
+  const { searchdata } = useSelector((store) => store.searchreducer);
+  console.log(searchdata);
+  const dispatch = useDispatch();
 
   const searchInputField = useRef();
   const page = 1;
 
   const getUsers = useRef();
-  getUsers.current = () => {
-    axiosInstance.post("chat/users").then((res) => {
-      setUsers(() => res?.data?.data?.users || []);
-      setFetchingUsers(false);
-    });
-  };
-
-  const handleSearchSubmit = async (e) => {
-    e.preventDefault();
-    setSearchingUsers(true);
-    await axiosInstance
-      .get(`user/search?user=${search}&page=${page}`)
-      .then((res) => {
-        setUsers(() => res?.data?.data?.users || []);
-      })
-      .catch(() => {});
-
-    setSearchingUsers(false);
-    searchInputField.current.focus();
+  getUsers.current = async () => {
+    await dispatch(fetch_User(axiosInstance));
+    setFetchingUsers(false);
   };
 
   useEffect(() => {
@@ -68,7 +59,17 @@ const Sidebar = ({ handleChange, active, toggle }) => {
       {/* Search bar */}
       <div>
         <form
-          onSubmit={handleSearchSubmit}
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setSearchingUsers(true);
+            await dispatch(
+              handleSearchSubmit(axiosInstance, searchInputField, search, page)
+            );
+
+            searchInputField.current.focus();
+            setissearch(true);
+            setSearchingUsers(false);
+          }}
           className="ring-offset-1 ring-1 ring-white rounded-full  flex flex-1 items-center relative w-11/12  mx-auto my-2 "
         >
           <input
@@ -85,16 +86,18 @@ const Sidebar = ({ handleChange, active, toggle }) => {
           />
           {/* <SearchIcon className="absolute right-4 text-gray-50" /> */}
           <div className=" absolute right-4 text-gray-50">
-            {search ? (
+            {issearch ? (
               <Cross
-                handleClick={() => {
-                  setSearchingUsers(false);
-                  getUsers.current();
+                handleClick={async () => {
+                  setSearchingUsers(true);
+                  await getUsers.current();
                   setSearch("");
+                  setissearch(false);
+                  setSearchingUsers(false);
                 }}
               />
             ) : (
-              <button>
+              <button type="submit">
                 <Search />
               </button>
             )}
@@ -110,7 +113,8 @@ const Sidebar = ({ handleChange, active, toggle }) => {
       >
         {!searchingUsers &&
           !fetchingUsers &&
-          users.map((user, index) => {
+          Array.isArray(searchdata) &&
+          searchdata.map((user, index) => {
             const { username, _id, lastMessage } = user;
             return (
               <div
@@ -149,7 +153,7 @@ const Sidebar = ({ handleChange, active, toggle }) => {
         {(searchingUsers || fetchingUsers) && (
           <div className="text-white font-medium">Loading . . .</div>
         )}
-        {!searchingUsers && !fetchingUsers && users.length === 0 && (
+        {!searchingUsers && !fetchingUsers && searchdata.length === 0 && (
           <div className="text-white font-medium">User Not found</div>
         )}
       </div>
