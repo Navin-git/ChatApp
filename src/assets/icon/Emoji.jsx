@@ -3,7 +3,7 @@ const Emoji = ({ setShowPicker }) => {
   return (
     <svg
       onClick={() => setShowPicker((val) => !val)}
-      className="w-6 h-6 absolute right-4 text-gray-50"
+      className="w-6 h-6 absolute z-30 right-4 text-gray-50"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"

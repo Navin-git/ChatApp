@@ -6,7 +6,7 @@ import Photo from "../../assets/icon/Photo";
 import Emoji from "../../assets/icon/Emoji";
 import Send from "../../assets/icon/Send";
 import Camera from "../../assets/icon/Camera";
-import Cross from "../../assets/icon/Cross";
+import PreviewImg from "./PreviewImg";
 
 const socket = io("https://warm-badlands-28984.herokuapp.com", {
   transports: ["websocket", "polling"],
@@ -95,24 +95,13 @@ const SendMessage = ({ active, getMessage }) => {
         onSubmit={handleMessageSubmit}
         className="flex w-full relative items-center mx-auto bg-gradient-to-r from-blue-400 to-blue-400 cursor-pointer  p-2 gap-2"
       >
-        <div
-          onClick={() => {
-            setimagepath("");
-            setfile("");
-          }}
-          className={`absolute -top-full flex gap-2 bg-blue-200 ${
-            imagepath || file ? " h-20 p-2" : "hidden"
-          }`}
-        >
-          <div className="p-1 absolute z-10 top-1 right-1 rounded-full bg-blue-500 text-white">
-            <Cross />
-          </div>
-          <canvas
-            ref={canvasa}
-            className={` relative ${imagepath ? "h-16" : "h-0"}`}
-          ></canvas>
-          <img alt="" className="h-full" src={file} />
-        </div>
+        <PreviewImg
+          setimagepath={setimagepath}
+          setfile={setfile}
+          canvasa={canvasa}
+          imagepath={imagepath}
+          file={file}
+        />
 
         <Camera
           handleClick={async () => {
@@ -142,10 +131,11 @@ const SendMessage = ({ active, getMessage }) => {
             ref={imgfile}
           />
         </div>
-        <div className="ring-offset-1 overflow-hidden ring-1 ring-white rounded-full  flex flex-1 items-center relative w-11/12  mx-auto my-2 ">
+        <div className="ring-offset-1  ring-1 ring-white rounded-2xl   flex flex-1 items-center relative w-11/12  mx-auto my-2 ">
           <textarea
             placeholder="Aa"
-            className="rounded-2xl pr-10 hover:bg-opacity-20  transition focus:outline-none duration-200 py-2 bg-gray-500 bg-opacity-10 placeholder-gray-50 pl-4 backdrop-blur-sm text-gray-50 w-full h-10"
+            spellCheck="false"
+            className="rounded-2xl pr-10 hover:bg-opacity-20 max-h-24 resize-none tbar transition focus:outline-none duration-200 py-2 bg-gray-500 bg-opacity-10 placeholder-gray-50 pl-4 backdrop-blur-sm h-10 text-gray-50 w-full min-h-10"
             value={inputStr}
             onChange={(e) => setInputStr(e.target.value)}
           />

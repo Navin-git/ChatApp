@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
-import moment from "moment";
-import Search from "../assets/icon/Search";
-import Cross from "../assets/icon/Cross";
-import axiosInstance from "../API/AxiosInstance";
-import { fetch_User, handleSearchSubmit } from "../redux/actions/actions";
+import Search from "../../assets/icon/Search";
+import Cross from "../../assets/icon/Cross";
+import axiosInstance from "../../API/AxiosInstance";
+import { handleSearchSubmit } from "../../redux/actions/actions";
 import { useSelector, useDispatch } from "react-redux";
+import { fetch_User } from "../../redux/actions/userlistAction";
+import SidebarList from "./SidebarList";
 
 const Sidebar = ({ handleChange, active, toggle }) => {
   const [search, setSearch] = useState("");
@@ -14,6 +15,8 @@ const Sidebar = ({ handleChange, active, toggle }) => {
   const [issearch, setissearch] = useState(false);
 
   const { searchdata } = useSelector((store) => store.searchreducer);
+  const { userlistdata } = useSelector((store) => store.userListReducer);
+
   console.log(searchdata);
   const dispatch = useDispatch();
 
@@ -29,6 +32,8 @@ const Sidebar = ({ handleChange, active, toggle }) => {
   useEffect(() => {
     fetchingUsers && getUsers.current();
   }, [fetchingUsers]);
+  console.log("search", searchdata);
+  console.log("user", userlistdata);
 
   return (
     <div
@@ -61,13 +66,12 @@ const Sidebar = ({ handleChange, active, toggle }) => {
         <form
           onSubmit={async (e) => {
             e.preventDefault();
+            setissearch(true);
             setSearchingUsers(true);
-            await dispatch(
-              handleSearchSubmit(axiosInstance, searchInputField, search, page)
-            );
+            await dispatch(handleSearchSubmit(axiosInstance, search, page));
 
             searchInputField.current.focus();
-            setissearch(true);
+
             setSearchingUsers(false);
           }}
           className="ring-offset-1 ring-1 ring-white rounded-full  flex flex-1 items-center relative w-11/12  mx-auto my-2 "
@@ -76,28 +80,26 @@ const Sidebar = ({ handleChange, active, toggle }) => {
             name="searchinput"
             required
             value={search}
+            spellCheck="false"
             disabled={searchingUsers ? true : false}
             onChange={(e) => {
               !searchingUsers && setSearch(e.target.value);
             }}
             ref={searchInputField}
             placeholder="enter your keyboard"
-            className="rounded-2xl pr-10 hover:bg-opacity-20  transition focus:outline-none duration-200  bg-gray-500 bg-opacity-10 text-sm placeholder-gray-50 pl-4 backdrop-blur-sm text-gray-50 w-full h-10"
+            className="rounded-2xl pr-10 hover:bg-opacity-20 autosearch transition focus:outline-none duration-200  bg-gray-500 bg-opacity-10 text-sm placeholder-gray-50 pl-4 backdrop-blur-sm text-gray-50 w-full h-10"
           />
           {/* <SearchIcon className="absolute right-4 text-gray-50" /> */}
-          <div className=" absolute right-4 text-gray-50">
+          <div className=" absolute right-4 flex items-center  text-gray-50">
             {issearch ? (
               <Cross
                 handleClick={async () => {
-                  setSearchingUsers(true);
-                  await getUsers.current();
                   setSearch("");
                   setissearch(false);
-                  setSearchingUsers(false);
                 }}
               />
             ) : (
-              <button type="submit">
+              <button className="self-center  h-full " type="submit">
                 <Search />
               </button>
             )}
@@ -111,51 +113,32 @@ const Sidebar = ({ handleChange, active, toggle }) => {
         style={{ width: "95%" }}
         className=" flex-1 sbar mx-auto overflow-y-auto "
       >
-        {!searchingUsers &&
-          !fetchingUsers &&
-          Array.isArray(searchdata) &&
-          searchdata.map((user, index) => {
-            const { username, _id, lastMessage } = user;
-            return (
-              <div
-                onClick={() => handleChange(user)}
-                key={index}
-                className={`flex my-1 rounded-lg flex-shrink-0 mr-2 hover:mr-0 focus:bg-blue-600 hover:bg-blue-600 cursor-pointer  p-2 gap-2 ${
-                  active?._id === _id ? "bg-blue-600" : ""
-                }`}
-              >
-                <div className="relative w-12 h-12">
-                  <img
-                    className="rounded-full border border-gray-100 shadow-sm"
-                    src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                    alt="user profile"
-                  />
-                  <div className="absolute top-0 right-0 h-3 w-3 my-1 border-2 border-white rounded-full bg-green-400 z-2"></div>
-                </div>
-                <div className="flex-1 text-left text-white">
-                  <h3 className="font-semibold">{username}</h3>
-                  {lastMessage && (
-                    <div className="flex gap-1 items-center">
-                      <p className="text-sm flex-1 lastMsg overflow-hidden  text-gray-100">
-                        {lastMessage && lastMessage.message}
-                      </p>
-                      <span className="text-xs  self-center">
-                        {lastMessage &&
-                          moment(lastMessage.time).format("ddd MMM DD YYYY")}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+        {!searchingUsers && !issearch && (
+          <SidebarList
+            type={"userlist"}
+            listdata={userlistdata}
+            handleChange={handleChange}
+            active={active}
+          />
+        )}
+        {!searchingUsers && issearch && (
+          <SidebarList
+            type={"userlist"}
+            listdata={searchdata}
+            handleChange={handleChange}
+            active={active}
+          />
+        )}
 
         {(searchingUsers || fetchingUsers) && (
           <div className="text-white font-medium">Loading . . .</div>
         )}
-        {!searchingUsers && !fetchingUsers && searchdata.length === 0 && (
-          <div className="text-white font-medium">User Not found</div>
-        )}
+        {issearch &&
+          !searchingUsers &&
+          !fetchingUsers &&
+          searchdata.length === 0 && (
+            <div className="text-white font-medium">User Not found</div>
+          )}
       </div>
     </div>
   );

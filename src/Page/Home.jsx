@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Intro from "../Components/Intro";
 import ChatMessages from "../Components/message/ChatMessages";
-import Sidebar from "../Components/Sidebar";
+import Sidebar from "../Components/sidebar/Sidebar";
 
 const Home = () => {
   const [active, setActive] = useState(0);

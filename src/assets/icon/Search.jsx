@@ -2,7 +2,7 @@ import React from "react";
 const Search = () => {
   return (
     <svg
-      className="w-6 h-6  text-gray-50"
+      className="w-6 h-6 self-center text-gray-50"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"

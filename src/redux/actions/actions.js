@@ -49,20 +49,20 @@ export const searchPostError = (error) => {
   };
 };
 
-export const fetch_User = (axiosInstance) => {
-  return async (dispatch) => {
-    await axiosInstance
-      .post("chat/users")
-      .then((res) => {
-        // setUsers(() => res?.data?.data?.users || []);
-        dispatch(searchPostSuccess(res?.data?.data?.users || []));
-        // setFetchingUsers(false);
-      })
-      .catch((err) => {
-        dispatch(searchPostError(err));
-      });
-  };
-};
+// export const fetch_User = (axiosInstance) => {
+//   return async (dispatch) => {
+//     await axiosInstance
+//       .post("chat/users")
+//       .then((res) => {
+//         // setUsers(() => res?.data?.data?.users || []);
+//         dispatch(searchPostSuccess(res?.data?.data?.users || []));
+//         // setFetchingUsers(false);
+//       })
+//       .catch((err) => {
+//         dispatch(searchPostError(err));
+//       });
+//   };
+// };
 export const handleSearchSubmit = (axiosInstance, search, page) => {
   return async (dispatch) => {
     await axiosInstance

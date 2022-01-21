@@ -39,9 +39,10 @@ const ChatMessages = ({
         messagediv
       )
     );
-    // messagediv.current.scrollTo(0, messagediv.current.scrollHeight);
+
     console.log(messagediv.current.scrollHeight);
     setFetchingMessages(false);
+    messagediv.current.scrollTo(0, messagediv.current.scrollHeight);
   };
 
   const getscrollmessage = async () => {
